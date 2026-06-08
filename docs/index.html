@@ -181,18 +181,42 @@ section::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;bac
 footer{padding:5vh 6vw;display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap}
 footer .colophon{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);max-width:60ch}
 footer .stamp{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:300;font-size:38px;letter-spacing:-.02em;color:var(--accent)}
-/* NTU SCTP type-scale overrides — applied at end of cascade */
-body{font-family:'Open Sans',sans-serif;color:var(--text-body);line-height:1.7}
-h1,h2,h3,h4,h5,h6{font-family:'Open Sans',sans-serif;font-weight:300;color:var(--text);line-height:1.2}
-h1 strong,h2 strong,h3 strong,h1 em,h2 em,h3 em{font-weight:700;color:var(--ntu-crimson);font-style:normal}
-.label,.dateline,.tag,.mono,.pca-tag,.lab,.kv,.pill,.deliver,.kctrl label,.duet-readout .k{font-family:'JetBrains Mono',ui-monospace,monospace}
-.cover h1{font-weight:300}
-.cover-lede{font-style:normal;color:var(--text-dim)}
-.cover-lede .dropcap{font-style:normal;font-weight:700;color:var(--ntu-crimson)}
-.section-title h2,.section-num{font-style:normal}
-.section-title .deck{font-style:normal;color:var(--text-dim)}
-a{color:var(--ntu-blue)}
+
+/* === L01 brand alignment overrides — applied at end of cascade === */
+html,body{font-size:16px!important;line-height:1.7!important;font-weight:400!important;background:var(--bg)!important;color:var(--text-body)!important;font-family:'Open Sans',sans-serif!important}
+body::before{display:none!important}
+a{color:var(--ntu-blue);text-decoration:none;border-bottom:1px solid currentColor}
 a:hover{color:var(--ntu-blue-light)}
+h1,h2,h3,h4,h5{font-family:'Open Sans',sans-serif!important;color:var(--text);font-weight:300;line-height:1.2;font-style:normal!important}
+strong,b{font-weight:700;color:var(--text)}
+em,i{font-style:italic;color:var(--ntu-crimson)}
+
+.cover{padding:5rem 2.5rem 4rem!important;background:var(--bg)}
+.cover h1{font-size:clamp(2.2rem,5vw,3.6rem)!important;font-weight:300!important;line-height:1.1!important;letter-spacing:-.02em!important;color:var(--text)!important;margin:.4em 0!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.cover h1 strong,.cover h1 em{color:var(--ntu-crimson)!important;font-weight:700!important;font-style:normal!important}
+.cover-lede{font-size:1.0625rem!important;line-height:1.65!important;color:var(--text-body)!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important;max-width:54ch}
+.cover-lede .dropcap{float:left;font-weight:700!important;font-size:3.2em!important;line-height:.92!important;padding:.08em .12em 0 0!important;color:var(--ntu-crimson)!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.fact .num{font-weight:300!important;font-size:2rem!important;color:var(--ntu-navy)!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.byline .badge{background:var(--ntu-crimson)!important;color:#fff!important;font-style:normal!important;font-weight:700!important;font-family:'Open Sans',sans-serif!important}
+
+.masthead-title{font-weight:300!important;font-size:clamp(1.4rem,2.6vw,1.9rem)!important;letter-spacing:-.01em!important;line-height:1.1!important;color:#fff!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.masthead-title strong,.masthead-title .italic{font-weight:700!important;color:var(--ntu-crimson)!important;font-style:normal!important;letter-spacing:0!important;font-size:1em!important;text-transform:none!important}
+
+section{padding:4rem 2.5rem!important}
+.section-num{font-weight:300!important;font-size:3.2rem!important;line-height:1!important;color:var(--ntu-crimson)!important;letter-spacing:-.03em!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.section-title h2{font-weight:300!important;font-size:clamp(1.6rem,3.2vw,2.2rem)!important;line-height:1.2!important;letter-spacing:-.015em!important;color:var(--text)!important;margin:.2em 0 .4em!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.section-title h2 em{color:var(--ntu-crimson)!important;font-style:normal!important;font-weight:700!important}
+.section-title .deck{font-size:1rem!important;color:var(--text-dim)!important;max-width:70ch!important;line-height:1.65!important;font-style:normal!important;font-family:'Open Sans',sans-serif!important}
+.section-title .deck em{color:var(--ntu-crimson)!important;font-style:normal!important;font-weight:600!important}
+
+h3{font-family:'Open Sans',sans-serif!important;font-weight:700!important;font-style:normal!important;color:var(--text)!important;font-size:1.1rem!important;letter-spacing:0!important;line-height:1.3!important}
+h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;font-weight:700!important}
+
+.lvt-foot,.bvb-col .sum,.pca-foot,.duet-verdict,.kside .verdict,.bake-note,.cover-lede,.callout,p,.deck{font-family:'Open Sans',sans-serif!important}
+.lvt-foot,.bvb-col .sum,.pca-foot,.bake-note{font-style:normal!important;color:var(--text-dim)!important}
+.duet-verdict,.kside .verdict{font-style:normal!important;color:var(--text)!important;font-weight:400!important}
+
+.tag{background:var(--ntu-crimson)!important;color:#fff!important;border-radius:3px!important;font-family:'JetBrains Mono','Open Sans',monospace!important}
 </style>
 </head>
 <body>
