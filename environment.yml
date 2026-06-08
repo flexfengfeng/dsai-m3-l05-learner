@@ -1,0 +1,24 @@
+name: dsai-m3
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - scipy
+  - statsmodels
+  - jupyter
+  - notebook
+  - ipywidgets
+  - pip:
+      - torch>=2.2
+      - torchvision>=0.17
+      - transformers>=4.40
+      - sentence-transformers>=3.0
+      - datasets
+      - textblob

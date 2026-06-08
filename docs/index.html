@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>L05 — Unsupervised Learning · Key Concepts · NTU SCTP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ntu-navy:#1B2A4A;--ntu-dark:#1E3054;--ntu-blue:#2C5697;--ntu-blue-light:#3D6DB5;
+  --ntu-crimson:#C8102E;--ntu-crimson-dark:#A50D26;
+  --bg:#FFFFFF;--bg-off:#F4F5F7;--border:#DDE1E6;--border-light:#E8EAED;
+  --text:#1B2A4A;--text-body:#333D4D;--text-dim:#5F6B7A;--text-light:#8C95A1;
+  --paper:var(--bg);--paper-2:var(--bg-off);--paper-3:var(--border-light);
+  --ink:var(--ntu-navy);--ink-2:var(--text-body);--ink-soft:var(--text-dim);
+  --rule:var(--border);--accent:var(--ntu-crimson);--accent-2:var(--ntu-crimson-dark);
+  --teal:var(--ntu-blue);--teal-2:var(--ntu-blue-light);--mustard:#B45309;--grain-op:0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Open Sans',sans-serif;font-weight:380;font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{background:var(--bg)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;mix-blend-mode:multiply;opacity:var(--grain-op);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0 0.05 0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+::selection{background:var(--accent);color:var(--paper)}
+.italic{font-style:italic;}
+.label{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2)}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+.rule-dot{border:0;border-top:1.5px dotted var(--rule);margin:0}
+
+.masthead{background:var(--ntu-navy);color:#fff;padding:1.1rem 6vw;border-bottom:5px solid var(--ntu-crimson)}
+.masthead .dateline{color:rgba(255,255,255,.75)}
+.masthead-title{color:#fff!important}
+.masthead-title strong,.masthead-title .italic{color:var(--ntu-crimson)}
+.masthead-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.masthead-title{font-family:'Open Sans',sans-serif;font-weight:340;font-style:italic;font-size:clamp(34px,5vw,56px);letter-spacing:-.03em;line-height:.85}
+.masthead-title sup{font-size:.4em;vertical-align:super;letter-spacing:0;font-style:normal;color:var(--accent)}
+.tag{display:inline-block;padding:3px 8px;background:var(--ink);color:var(--paper);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+.dateline{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.masthead-meta{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+
+.cover{padding:5vh 6vw 6vh calc(6vw + 6px);border-bottom:6px solid var(--ntu-crimson);position:relative;overflow:hidden}
+.cover::after{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--ntu-crimson)}
+.cover-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end}
+@media (max-width:900px){.cover-grid{grid-template-columns:1fr;gap:24px}}
+.cover h1{font-family:'Open Sans',sans-serif;font-weight:300;font-size:clamp(56px,11vw,168px);line-height:.84;letter-spacing:-.04em;margin:.1em 0}
+.cover h1 em{font-style:italic;color:var(--accent);}
+.cover-lede{font-family:'Open Sans',sans-serif;font-size:clamp(18px,1.6vw,22px);font-style:italic;color:var(--ink-2);max-width:46ch;line-height:1.45}
+.cover-lede .dropcap{float:left;font-family:'Open Sans',sans-serif;font-style:italic;font-size:5.2em;line-height:.78;padding:.08em .1em 0 0;color:var(--accent);font-weight:330}
+.cover-side{display:flex;flex-direction:column;gap:18px}
+.fact-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule)}
+.fact{padding:14px;border-right:1px solid var(--rule)}
+.fact:last-child{border-right:0}
+.fact .num{font-family:'Open Sans',sans-serif;font-size:42px;line-height:1;letter-spacing:-.04em}
+.fact .lab{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);margin-top:6px}
+.byline{display:flex;gap:18px;align-items:center;margin-top:8px}
+.byline .badge{width:48px;height:48px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Open Sans',sans-serif;font-weight:500;font-style:italic;font-size:22px}
+.byline b{display:block;font-family:'Open Sans',sans-serif;font-weight:600}
+
+section{padding:7vh 6vw 7vh calc(6vw + 6px);border-bottom:1px solid var(--rule);position:relative}
+section::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--ntu-crimson)}
+.section-head{display:grid;grid-template-columns:120px 1fr;gap:32px;margin-bottom:48px;align-items:start}
+@media (max-width:760px){.section-head{grid-template-columns:1fr;gap:8px}}
+.section-num{font-family:'Open Sans',sans-serif;font-style:italic;font-size:84px;line-height:.8;color:var(--accent);font-weight:340}
+.section-title h2{font-family:'Open Sans',sans-serif;font-weight:340;font-size:clamp(34px,4.4vw,56px);line-height:.95;letter-spacing:-.03em;margin:0 0 .25em}
+.section-title h2 em{font-style:italic;color:var(--accent)}
+.section-title .deck{font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:20px;max-width:62ch}
+
+.jobs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:760px){.jobs{grid-template-columns:1fr}}
+.job{border:1px solid var(--rule);background:var(--paper-2);padding:22px;display:flex;flex-direction:column;gap:10px;position:relative;min-height:340px}
+.job .pic{height:100px;background:var(--paper-3);border:1px solid var(--rule);position:relative;overflow:hidden}
+.job .pic svg{width:100%;height:100%;display:block}
+.job h3{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:30px;letter-spacing:-.02em;margin:.2em 0 .1em;line-height:1}
+.job h3 em{color:var(--accent)}
+.job .deliver{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);border-top:1px dotted var(--rule);padding-top:8px;margin-top:auto}
+.job .deliver b{color:var(--accent)}
+.job p{font-family:'Open Sans',sans-serif;color:var(--ink-2);font-size:15.5px;line-height:1.5;margin:0}
+.job .pill{display:inline-block;padding:2px 8px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--rule);background:var(--paper);width:fit-content}
+
+.pca{display:grid;grid-template-columns:1fr 1fr;gap:14px;border:1px solid var(--rule)}
+@media (max-width:760px){.pca{grid-template-columns:1fr}}
+.pca-col{padding:22px;background:var(--paper)}
+.pca-col + .pca-col{border-left:1px solid var(--rule);background:var(--paper-2)}
+@media (max-width:760px){.pca-col + .pca-col{border-left:0;border-top:1px solid var(--rule)}}
+.pca-col h3{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:28px;letter-spacing:-.02em;margin:.1em 0 .35em}
+.pca-col h3 em{color:var(--accent)}
+.pca-tag{display:inline-block;padding:2px 8px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--rule)}
+.pca-tag.bad{background:transparent;color:var(--ink-2)}
+.pca-tag.good{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+.pca-svg{width:100%;height:260px;display:block;border:1px solid var(--rule);background:var(--paper-3)}
+.pca-foot{margin-top:12px;font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:15.5px;line-height:1.5}
+.pca-readout{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pca-readout .kv{font-family:"JetBrains Mono",monospace;font-size:11px;background:var(--paper);border:1px solid var(--rule);padding:6px 10px}
+.pca-readout .kv b{color:var(--accent)}
+
+.kmeans{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start}
+@media (max-width:900px){.kmeans{grid-template-columns:1fr}}
+.kctrl{background:var(--paper-2);border:1px solid var(--rule);padding:22px}
+.kctrl h3{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:26px;letter-spacing:-.02em;margin:0 0 .4em}
+.kctrl label{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);display:block;margin-top:14px}
+.kctrl input[type=range]{width:100%;accent-color:var(--accent);margin-top:6px}
+.kctrl .ksvg{width:100%;height:230px;display:block;border:1px solid var(--rule);background:var(--paper);margin-top:14px}
+.kside{display:flex;flex-direction:column;gap:14px}
+.kside .pts-svg{width:100%;height:280px;display:block;border:1px solid var(--rule);background:var(--paper-2)}
+.kside .verdict{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:24px;line-height:1.1;letter-spacing:-.02em;min-height:1.8em}
+.kside .verdict em{color:var(--accent)}
+.kside .sizes{display:flex;gap:6px;flex-wrap:wrap}
+.kside .sz{font-family:"JetBrains Mono",monospace;font-size:11px;border:1px solid var(--rule);background:var(--paper);padding:6px 10px}
+.kside .sz.tiny{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+.kside .sz .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+.profile{border:1px solid var(--rule);overflow-x:auto;background:var(--paper)}
+.profile table{width:100%;border-collapse:collapse;font-family:"JetBrains Mono",monospace;font-size:12px}
+.profile th,.profile td{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 12px;text-align:center}
+.profile th:last-child,.profile td:last-child{border-right:0}
+.profile th{background:var(--ink);color:var(--paper);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.profile td.name{text-align:left;font-family:'Open Sans',sans-serif;font-style:italic;font-size:18px;letter-spacing:-.01em}
+.profile td.high{background:rgba(207,58,23,.18);color:var(--accent-2);font-weight:700}
+.profile td.low{background:rgba(14,69,64,.14);color:var(--teal);font-weight:700}
+.profile td.mid{color:var(--ink-soft)}
+.profile-note{margin-top:14px;font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:15.5px;line-height:1.5;max-width:78ch}
+
+.iso{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start}
+@media (max-width:900px){.iso{grid-template-columns:1fr}}
+.iso-ctrl{background:var(--paper-2);border:1px solid var(--rule);padding:22px}
+.iso-ctrl h3{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:26px;letter-spacing:-.02em;margin:0 0 .4em}
+.iso-ctrl label{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);display:block;margin-top:14px}
+.iso-ctrl input[type=range]{width:100%;accent-color:var(--accent);margin-top:6px}
+.iso-svg{width:100%;height:280px;display:block;border:1px solid var(--rule);background:var(--paper-3)}
+.iso-list{margin-top:14px;border:1px solid var(--rule);background:var(--paper);padding:14px;max-height:300px;overflow-y:auto}
+.iso-list h4{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);margin:0 0 10px}
+.iso-row{display:grid;grid-template-columns:60px 1fr 70px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dotted var(--rule);font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-2)}
+.iso-row:last-child{border-bottom:0}
+.iso-row .id{color:var(--ink-soft)}
+.iso-row .desc{font-family:'Open Sans',sans-serif;font-style:italic;font-size:13.5px;color:var(--ink)}
+.iso-row .sc{text-align:right;color:var(--accent);font-weight:700}
+
+.honest{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:760px){.honest{grid-template-columns:1fr}}
+.h-card{border:1px solid var(--rule);background:var(--paper-2);padding:22px;display:flex;flex-direction:column;gap:10px;position:relative}
+.h-card .n{font-family:'Open Sans',sans-serif;font-style:italic;font-size:62px;line-height:.8;color:var(--accent);font-weight:340}
+.h-card h4{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:26px;letter-spacing:-.015em;margin:.2em 0 .1em}
+.h-card p{font-family:'Open Sans',sans-serif;color:var(--ink-2);font-size:15.5px;line-height:1.5;margin:0}
+.h-card .ex{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.04em;background:var(--paper);border:1px dashed var(--rule);padding:8px 10px;margin-top:6px}
+.h-card .ex.good{border-color:var(--teal);color:var(--teal)}
+.h-card .ex.bad{border-color:var(--accent);color:var(--accent-2)}
+
+.pull{padding:8vh 6vw;background:var(--ink);color:var(--paper);position:relative;overflow:hidden;border-bottom:1px solid var(--rule)}
+.pull::before{content:"";position:absolute;inset:0;background:radial-gradient(800px 400px at 80% 30%,rgba(207,58,23,.22),transparent 60%);pointer-events:none}
+.pull blockquote{margin:0;max-width:24ch;font-family:'Open Sans',sans-serif;font-style:italic;font-weight:300;font-size:clamp(34px,5vw,72px);letter-spacing:-.025em;line-height:1}
+.pull blockquote em{color:var(--accent);font-style:italic}
+.pull cite{display:block;margin-top:18px;font-family:"JetBrains Mono",monospace;font-style:normal;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#cfc6ad}
+
+.qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:760px){.qa-grid{grid-template-columns:1fr}}
+.qa{background:var(--paper-2);border:1px solid var(--rule);padding:18px 20px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:background .2s;position:relative}
+.qa::before{content:attr(data-qn);position:absolute;top:10px;right:14px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink-soft);letter-spacing:.14em}
+.qa:hover{background:var(--paper-3)}
+.qa b{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:22px;line-height:1.15;letter-spacing:-.015em;padding-right:48px}
+.qa .a{display:none;font-family:'Open Sans',sans-serif;font-size:15.5px;color:var(--ink-2);line-height:1.5;border-top:1px dotted var(--rule);padding-top:10px;margin-top:2px}
+.qa.on{background:var(--ink);color:var(--paper)}
+.qa.on b{color:var(--paper)}
+.qa.on::before{color:var(--accent)}
+.qa.on .a{display:block;color:#e3d8be;border-color:#5e5641}
+.hint{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-top:2px}
+.qa.on .hint{color:#f5c2ad}
+
+.map{display:grid;grid-template-columns:repeat(10,1fr);gap:0;border:1px solid var(--rule);overflow:hidden}
+@media (max-width:1100px){.map{grid-template-columns:repeat(5,1fr)}}
+@media (max-width:600px){.map{grid-template-columns:repeat(2,1fr)}}
+.node{padding:16px 14px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--paper);position:relative;cursor:default}
+.node:last-child{border-right:0}
+.node .ix{position:absolute;top:10px;left:12px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;color:var(--ink-soft)}
+.node .ttl{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:20px;letter-spacing:-.01em;line-height:1.05}
+.node .sub{font-family:'Open Sans',sans-serif;font-size:13px;color:var(--ink-2);margin-top:4px;display:none}
+.node:hover .sub{display:block}
+.node.is-now{background:var(--accent);color:var(--paper)}
+.node.is-now .ix,.node.is-now .sub{color:#ffe1d3}
+.node .lens{position:absolute;top:10px;right:10px;font-family:"JetBrains Mono",monospace;font-size:10px;background:var(--teal);color:var(--paper);padding:1px 5px;letter-spacing:.1em}
+
+footer{padding:5vh 6vw;display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap}
+footer .colophon{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);max-width:60ch}
+footer .stamp{font-family:'Open Sans',sans-serif;font-style:italic;font-weight:340;font-size:38px;letter-spacing:-.02em;color:var(--accent)}
+/* NTU SCTP type-scale overrides — applied at end of cascade */
+body{font-family:'Open Sans',sans-serif;color:var(--text-body);line-height:1.7}
+h1,h2,h3,h4,h5,h6{font-family:'Open Sans',sans-serif;font-weight:300;color:var(--text);line-height:1.2}
+h1 strong,h2 strong,h3 strong,h1 em,h2 em,h3 em{font-weight:700;color:var(--ntu-crimson);font-style:normal}
+.label,.dateline,.tag,.mono,.pca-tag,.lab,.kv,.pill,.deliver,.kctrl label,.duet-readout .k{font-family:'JetBrains Mono',ui-monospace,monospace}
+.cover h1{font-weight:300}
+.cover-lede{font-style:normal;color:var(--text-dim)}
+.cover-lede .dropcap{font-style:normal;font-weight:700;color:var(--ntu-crimson)}
+.section-title h2,.section-num{font-style:normal}
+.section-title .deck{font-style:normal;color:var(--text-dim)}
+a{color:var(--ntu-blue)}
+a:hover{color:var(--ntu-blue-light)}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <div>
+      <div class="dateline">M3 &middot; Module Three &middot; Machine Learning &amp; GenAI</div>
+      <div class="masthead-title">No Target <span class="italic">Column</span><sup>L05</sup></div>
+    </div>
+    <div class="masthead-meta">
+      <span class="tag">Interactive &middot; Field Notes</span>
+      <span class="dateline">Vol. 1 &middot; Issue 05 &middot; Unsupervised Learning</span>
+    </div>
+  </div>
+</header>
+
+<section class="cover">
+  <div class="cover-grid">
+    <div>
+      <div class="label" style="color:var(--accent)">Chapter Five &middot; Same CSV. Drop the label.</div>
+      <h1>"Find natural <em>clusters.</em><br>And the <em>weird</em> ones."</h1>
+      <p class="cover-lede"><span class="dropcap">F</span>or four weeks Sarah has worked with a target column. This week there isn't one &mdash; and Marcus's brief is two things at once: <em>find groups</em> and <em>find oddballs</em>. By Friday she ships named segments to marketing and a watch list to customer success. Same data; what changes is that there is no "right answer" to score against.</p>
+    </div>
+    <div class="cover-side">
+      <div class="fact-strip">
+        <div class="fact"><div class="num">3</div><div class="lab">Jobs, not one</div></div>
+        <div class="fact"><div class="num">~5%</div><div class="lab">Watch-list target</div></div>
+        <div class="fact"><div class="num">0</div><div class="lab">Labels available</div></div>
+      </div>
+      <div class="byline">
+        <div class="badge">SC</div>
+        <div><b>Sarah Chen</b><span class="label">Cust. Experience Analyst &middot; Feb 2023</span></div>
+      </div>
+      <hr class="rule-dot"/>
+      <div class="label" style="letter-spacing:.18em;font-style:italic;color:var(--ink-2)">Tap a card. Move the slider. Watch clusters and anomalies update.</div>
+    </div>
+  </div>
+</section>
+
+<section id="s1">
+  <div class="section-head">
+    <div class="section-num">I.</div>
+    <div class="section-title">
+      <div class="label">A taxonomy</div>
+      <h2>Unsupervised is <em>three jobs</em>, not one.</h2>
+      <p class="deck">The deliverable picks the algorithm &mdash; not the other way around. A 2D picture for a stakeholder is PCA. A segment label per row is K-Means. A ranked list of weird rows is Isolation Forest. Pick the job, then the tool.</p>
+    </div>
+  </div>
+
+  <div class="jobs">
+    <div class="job">
+      <span class="pill">Job 01</span>
+      <div class="pic"><svg viewBox="0 0 200 100" preserveAspectRatio="none">
+        <g><circle cx="40" cy="60" r="4" fill="#13110c"/><circle cx="52" cy="44" r="4" fill="#13110c"/><circle cx="70" cy="52" r="4" fill="#13110c"/><circle cx="84" cy="38" r="4" fill="#13110c"/><circle cx="100" cy="46" r="4" fill="#13110c"/><circle cx="118" cy="34" r="4" fill="#13110c"/><circle cx="134" cy="42" r="4" fill="#13110c"/><circle cx="150" cy="30" r="4" fill="#13110c"/><circle cx="166" cy="36" r="4" fill="#13110c"/></g>
+        <line x1="30" y1="70" x2="178" y2="22" stroke="#cf3a17" stroke-width="2"/>
+        <text x="180" y="20" font-family="JetBrains Mono, monospace" font-size="8" fill="#cf3a17" text-anchor="end" letter-spacing="1.2">PC1</text>
+      </svg></div>
+      <h3>Reduce <em>dimension.</em></h3>
+      <p>Compress 10+ correlated features into a handful of variance-rich axes. Useful for visualisation, denoising, and as preprocessing for everything that follows.</p>
+      <div class="deliver">Deliverable &middot; <b>a picture</b></div>
+    </div>
+
+    <div class="job">
+      <span class="pill">Job 02</span>
+      <div class="pic"><svg viewBox="0 0 200 100" preserveAspectRatio="none">
+        <g fill="#cf3a17"><circle cx="35" cy="35" r="3"/><circle cx="42" cy="30" r="3"/><circle cx="48" cy="40" r="3"/><circle cx="55" cy="32" r="3"/></g>
+        <g fill="#0e4540"><circle cx="100" cy="70" r="3"/><circle cx="110" cy="62" r="3"/><circle cx="118" cy="74" r="3"/><circle cx="124" cy="64" r="3"/><circle cx="132" cy="72" r="3"/></g>
+        <g fill="#b8881f"><circle cx="160" cy="36" r="3"/><circle cx="168" cy="44" r="3"/><circle cx="172" cy="32" r="3"/></g>
+      </svg></div>
+      <h3>Find <em>segments.</em></h3>
+      <p>Assign every customer to a group. The output is integer labels; the deliverable is named segments &mdash; built by profiling each cluster's mean against the global mean.</p>
+      <div class="deliver">Deliverable &middot; <b>a label per row</b></div>
+    </div>
+
+    <div class="job">
+      <span class="pill">Job 03</span>
+      <div class="pic"><svg viewBox="0 0 200 100" preserveAspectRatio="none">
+        <g fill="#13110c" opacity="0.55"><circle cx="60" cy="50" r="2.5"/><circle cx="70" cy="44" r="2.5"/><circle cx="78" cy="56" r="2.5"/><circle cx="86" cy="48" r="2.5"/><circle cx="94" cy="52" r="2.5"/><circle cx="102" cy="46" r="2.5"/><circle cx="110" cy="58" r="2.5"/><circle cx="118" cy="50" r="2.5"/><circle cx="126" cy="44" r="2.5"/><circle cx="134" cy="54" r="2.5"/></g>
+        <circle cx="22" cy="18" r="6" fill="#cf3a17"/><circle cx="180" cy="84" r="6" fill="#cf3a17"/>
+        <circle cx="22" cy="18" r="11" fill="none" stroke="#cf3a17" stroke-dasharray="3 3"/>
+        <circle cx="180" cy="84" r="11" fill="none" stroke="#cf3a17" stroke-dasharray="3 3"/>
+      </svg></div>
+      <h3>Surface <em>anomalies.</em></h3>
+      <p>Rank rows by how unusual their feature <em>combination</em> is &mdash; not by extreme single values. A starting point for human investigation, not a final verdict.</p>
+      <div class="deliver">Deliverable &middot; <b>a ranked watch list</b></div>
+    </div>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="section-head">
+    <div class="section-num">II.</div>
+    <div class="section-title">
+      <div class="label">PCA</div>
+      <h2><em>Scale first</em>, or PC1 just tracks pounds.</h2>
+      <p class="deck">PCA maximises variance. Unscaled, a feature in pounds (range 0&ndash;500) drowns out a feature in proportions (range 0&ndash;1). Same data, two PCA runs &mdash; on the right the principal component finds the <em>joint</em> pattern, not the loudest column.</p>
+    </div>
+  </div>
+
+  <div class="pca">
+    <div class="pca-col">
+      <span class="pca-tag bad">&#10005; Unscaled</span>
+      <h3>PC1 = <em>spend in pounds.</em></h3>
+      <svg class="pca-svg" id="pcaRaw" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg>
+      <p class="pca-foot">The first principal component points almost exactly along the spend axis &mdash; because spend has the largest raw variance. PC1 carries 96% of the variance, but it's just one feature in disguise.</p>
+      <div class="pca-readout">
+        <div class="kv">PC1 var: <b>96%</b></div>
+        <div class="kv">spend loading: <b>0.99</b></div>
+        <div class="kv">ratio loading: <b>0.01</b></div>
+      </div>
+    </div>
+    <div class="pca-col">
+      <span class="pca-tag good">&#10003; StandardScaler</span>
+      <h3>PC1 reads the <em>joint pattern.</em></h3>
+      <svg class="pca-svg" id="pcaScaled" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg>
+      <p class="pca-foot">After Z-scoring, both features contribute on equal footing. PC1 catches what they have in common (e.g. an "engagement" direction); the explained variance is more honestly distributed.</p>
+      <div class="pca-readout">
+        <div class="kv">PC1 var: <b>62%</b></div>
+        <div class="kv">spend loading: <b>0.71</b></div>
+        <div class="kv">ratio loading: <b>0.71</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="section-head">
+    <div class="section-num">III.</div>
+    <div class="section-title">
+      <div class="label">K-Means</div>
+      <h2>Pick K. The plot rarely <em>tells you.</em></h2>
+      <p class="deck">Inertia drops smoothly. Silhouette rarely peaks sharply. The slider scans K=2 to 10 &mdash; watch the curves; watch the cluster sizes. A tiny 12-row cluster next to three 2,500-row clusters is almost always an anomaly cluster, not a segment.</p>
+    </div>
+  </div>
+
+  <div class="kmeans">
+    <div class="kctrl">
+      <h3>Choose K</h3>
+      <label>K = <span class="mono" id="kV">4</span></label>
+      <input type="range" id="kSlider" min="2" max="10" step="1" value="4">
+      <svg class="ksvg" id="kCurves" viewBox="0 0 600 230" preserveAspectRatio="none"></svg>
+      <p style="font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:14.5px;margin:12px 0 0;line-height:1.5">Teal = inertia (lower is tighter). Vermillion = silhouette (higher is more separated). The vertical line marks your K.</p>
+    </div>
+
+    <div class="kside">
+      <svg class="pts-svg" id="kPoints" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="verdict" id="kVerdict">&mdash;</div>
+      <div class="sizes" id="kSizes"></div>
+    </div>
+  </div>
+</section>
+
+<section id="s4">
+  <div class="section-head">
+    <div class="section-num">IV.</div>
+    <div class="section-title">
+      <div class="label">Profiling</div>
+      <h2>Cluster integers are <em>useless.</em> Name them.</h2>
+      <p class="deck">The output of <span class="mono">fit_predict</span> is 0, 1, 2, 3. The deliverable is a sentence per segment. Group by cluster, take each feature's mean, compare to the global mean &mdash; high in red, low in teal &mdash; and read the story off the rows.</p>
+    </div>
+  </div>
+
+  <div class="profile">
+    <table>
+      <thead>
+        <tr>
+          <th>Segment</th>
+          <th>tenure</th>
+          <th>monthly spend</th>
+          <th>returns ratio</th>
+          <th>support tickets</th>
+          <th>logins / mo</th>
+          <th>Sentence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">Cluster 0 &middot; <em>Loyal Premium</em></td>
+          <td class="high">+1.4&sigma;</td>
+          <td class="high">+1.6&sigma;</td>
+          <td class="low">-1.1&sigma;</td>
+          <td class="low">-0.8&sigma;</td>
+          <td class="high">+0.9&sigma;</td>
+          <td style="text-align:left;font-style:italic;color:var(--ink-2)">Long tenure, high spend, low returns &mdash; the wallet.</td>
+        </tr>
+        <tr>
+          <td class="name">Cluster 1 &middot; <em>New &amp; Curious</em></td>
+          <td class="low">-1.3&sigma;</td>
+          <td class="mid">-0.1&sigma;</td>
+          <td class="mid">+0.2&sigma;</td>
+          <td class="low">-0.6&sigma;</td>
+          <td class="high">+1.1&sigma;</td>
+          <td style="text-align:left;font-style:italic;color:var(--ink-2)">Brand-new, exploring &mdash; high engagement, no settling yet.</td>
+        </tr>
+        <tr>
+          <td class="name">Cluster 2 &middot; <em>At-risk Promoters</em></td>
+          <td class="high">+0.6&sigma;</td>
+          <td class="mid">+0.1&sigma;</td>
+          <td class="high">+1.3&sigma;</td>
+          <td class="high">+1.4&sigma;</td>
+          <td class="low">-1.0&sigma;</td>
+          <td style="text-align:left;font-style:italic;color:var(--ink-2)">Tenured but unhappy &mdash; returns and tickets up, logins down.</td>
+        </tr>
+        <tr>
+          <td class="name">Cluster 3 &middot; <em>Bargain Hunters</em></td>
+          <td class="low">-0.4&sigma;</td>
+          <td class="low">-1.2&sigma;</td>
+          <td class="high">+0.8&sigma;</td>
+          <td class="mid">+0.2&sigma;</td>
+          <td class="mid">-0.1&sigma;</td>
+          <td style="text-align:left;font-style:italic;color:var(--ink-2)">Low spend, high returns &mdash; sale-driven, low loyalty.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="profile-note">The heatmap is the story. Each row is now actionable: marketing can run a campaign per segment, retention can target Cluster 2 first. "Cluster 2" is not the deliverable &mdash; <em>"At-risk Promoters: tenured customers with rising returns and falling logins"</em> is.</p>
+</section>
+
+<section id="s5">
+  <div class="section-head">
+    <div class="section-num">V.</div>
+    <div class="section-title">
+      <div class="label">Anomalies</div>
+      <h2><span class="mono">contamination</span> is a <em>dial</em>, not a parameter.</h2>
+      <p class="deck">Isolation Forest's <span class="mono">score_samples()</span> is continuous and independent of <span class="mono">contamination</span>. Move the slider to re-threshold &mdash; no refit. The top rows are not a verdict; they are a list for someone in customer success to read.</p>
+    </div>
+  </div>
+
+  <div class="iso">
+    <div>
+      <svg class="iso-svg" id="isoSvg" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet"></svg>
+      <p style="font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:14.5px;margin:12px 0 0;line-height:1.5">Each dot is a customer in PC1&ndash;PC2 space. Vermillion = above the contamination threshold (anomalous). The dashed ring is the threshold &mdash; outside it goes onto the watch list.</p>
+    </div>
+    <div class="iso-ctrl">
+      <h3>Threshold dial</h3>
+      <label>contamination &middot; <span class="mono" id="conV">5.0%</span></label>
+      <input type="range" id="conSlider" min="1" max="15" step="1" value="5">
+      <p style="font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:15px;margin-top:14px;line-height:1.5">Lowering <span class="mono">contamination</span> shrinks the list to the most suspicious rows &mdash; useful when the team can only follow up on a few per week.</p>
+      <div class="iso-list">
+        <h4>Top anomalies &middot; <span id="isoCount">12</span> flagged</h4>
+        <div id="isoRows"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="section-head">
+    <div class="section-num">VI.</div>
+    <div class="section-title">
+      <div class="label">A checklist</div>
+      <h2>Three checks before you reach for an <em>algorithm.</em></h2>
+      <p class="deck">Skip these and you'll ship a result that is mathematically defensible but operationally useless &mdash; or one the stakeholder cannot read.</p>
+    </div>
+  </div>
+
+  <div class="honest">
+    <div class="h-card">
+      <div class="n">1</div>
+      <h4>What is the <em>deliverable?</em></h4>
+      <p>A picture for a stakeholder is PCA. A segment per row is K-Means (or DBSCAN). A ranked list of weird rows is Isolation Forest. Pick the deliverable first &mdash; do not start the other way around.</p>
+      <span class="ex bad">&#10005; "Let's try K-Means and see what happens."</span>
+      <span class="ex good">&#10003; "Marketing needs four named segments. K-Means with K=4."</span>
+    </div>
+    <div class="h-card">
+      <div class="n">2</div>
+      <h4>Is preprocessing <em>identical</em>?</h4>
+      <p>Median-impute, standard-scale, one-hot encode &mdash; exactly as in L03. No held-out test set means no second chance to catch a leakage bug. Tighten the discipline, don't loosen it.</p>
+      <span class="ex bad">&#10005; "It's unsupervised &mdash; do we need to scale?"</span>
+      <span class="ex good">&#10003; "Same ColumnTransformer as the churn model."</span>
+    </div>
+    <div class="h-card">
+      <div class="n">3</div>
+      <h4>Metric <em>and</em> sentence?</h4>
+      <p>"K=4 because silhouette peaks there" is half an answer. The full one names the operational reason: campaigns marketing can run, segments the team can describe.</p>
+      <span class="ex bad">&#10005; "Silhouette peaked at K=4."</span>
+      <span class="ex good">&#10003; "Silhouette + elbow support K=3-4, and marketing can run four campaigns but not seven."</span>
+    </div>
+  </div>
+</section>
+
+<aside class="pull">
+  <blockquote>"But our sales are seasonal &mdash; every December we spike, every February we crash. Can you <em>forecast</em> next quarter's revenue?"</blockquote>
+  <cite>&mdash; Marcus &middot; after Sarah ships segments + watch list &middot; the engine of L06</cite>
+</aside>
+
+<section id="s7">
+  <div class="section-head">
+    <div class="section-num">VII.</div>
+    <div class="section-title">
+      <div class="label">Check yourself</div>
+      <h2>Nine questions from the <em>field notebook.</em></h2>
+      <p class="deck">Try each mentally first. Click to flip the card. Numbering matches <span class="mono">lesson.md</span>.</p>
+    </div>
+  </div>
+
+  <div class="qa-grid">
+    <div class="qa" data-qn="Q1">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>PCA on raw NorthStar data &mdash; PC1 is almost entirely <span class="mono">avg_monthly_spend</span>. What happened?</b>
+      <div class="a">PCA maximises variance; spend (in pounds) has a much bigger raw range than ratios (0&ndash;1) or counts (0&ndash;10). Without scaling, its variance swamps everything. <b>Fix:</b> <span class="mono">StandardScaler</span> before <span class="mono">PCA</span>. Each feature then contributes equally; PC1 reflects the strongest joint pattern, not the loudest column.</div>
+    </div>
+
+    <div class="qa" data-qn="Q2">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>The first 2 PCs explain 22%; you need 6-8 to reach 80%. What does that tell you?</b>
+      <div class="a">Variance is spread across many directions &mdash; the features are largely independent. PCA cannot compress aggressively here. A 2D plot is still useful for Marcus, but be explicit: it shows ~22% of the signal. The clustering downstream uses all 17 dimensions, not just the two on the screen.</div>
+    </div>
+
+    <div class="qa" data-qn="Q3">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>PC1 loads strongly on tenure, total_purchases, avg_monthly_spend. What is PC1?</b>
+      <div class="a">An <em>engagement / activity</em> axis. Customers high on PC1 have stayed longer, bought more, spent more. To a stakeholder: "PC1 ranks customers from least to most engaged." The algorithm gives coefficients; you read them and supply the human label.</div>
+    </div>
+
+    <div class="qa" data-qn="Q4">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>Elbow plot has no clear bend; silhouette peaks weakly at K=2. What do you ship?</b>
+      <div class="a">Real data rarely has sharp natural clusters under K-Means' spherical assumption. Two honest options: (a) pick K from <em>business need</em> ("four because marketing can run four campaigns") and be explicit that actionability decided it, or (b) try a different family (DBSCAN, hierarchical). Do not pretend the elbow showed something it did not.</div>
+    </div>
+
+    <div class="qa" data-qn="Q5">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>K=4 returns three clusters of ~2,500 and one of 12. Interpretation?</b>
+      <div class="a">The 12-row cluster is an anomaly group K-Means could not assign elsewhere. Two options: report those 12 as a <em>watch list</em> alongside three real segments, or drop them as outliers and refit at K=3. Do not present "four equally important segments" &mdash; that misrepresents the result.</div>
+    </div>
+
+    <div class="qa" data-qn="Q6">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>How do you turn integer cluster labels into something Marcus can act on?</b>
+      <div class="a">Group the data by cluster, take each feature's mean per cluster, compare to the global mean (Z-score for a heatmap). Each cluster has a profile &mdash; high on some features, low on others. Write one sentence per cluster: <em>"Cluster 0: long tenure, high spend, low returns &mdash; Loyal Premium."</em> Names + profile table, not integers.</div>
+    </div>
+
+    <div class="qa" data-qn="Q7">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>Fit Isolation Forest with <span class="mono">contamination=0.05</span>, then want 2%. Do you refit?</b>
+      <div class="a"><b>No.</b> <span class="mono">contamination</span> only sets the threshold between +1 / -1 labels; the continuous <span class="mono">score_samples()</span> is independent of it. Keep the model, take the scores, pick a stricter percentile cutoff. That is why <span class="mono">contamination</span> is an operational dial, not a model parameter.</div>
+    </div>
+
+    <div class="qa" data-qn="Q8">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>Top anomaly: tenure 70mo, 0 purchases this quarter, 7 support tickets. Real? Action?</b>
+      <div class="a"><b>Yes</b> &mdash; a long-tenured customer who suddenly stopped engaging and started complaining is genuinely unusual. No single Z-score would catch the <em>combination</em>. Action is not "label as fraud" &mdash; it is <em>"send to customer success for a personal call."</em> Report the diverging features alongside the flag.</div>
+    </div>
+
+    <div class="qa" data-qn="Q9">
+      <span class="hint">&#9656; Click to reveal</span>
+      <b>Anomalies are spread across all four clusters, not concentrated in one. What does that confirm?</b>
+      <div class="a">Anomaly detection and clustering answer different questions: clusters are dense regions, anomalies are sparse edges &mdash; and edges exist around every cluster. If anomalies were concentrated in one cluster, that cluster itself would be an outlier group and you'd re-examine K. Spread anomalies confirm the two methods are complementary.</div>
+    </div>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="section-head">
+    <div class="section-num">VIII.</div>
+    <div class="section-title">
+      <div class="label">A roadmap</div>
+      <h2>L05 is the first lesson <em>without labels.</em></h2>
+      <p class="deck">PCA, K-Means, and Isolation Forest recur whenever the target column is missing, noisy, or arrives late. Hover any tile for "how L05 shows up here".</p>
+    </div>
+  </div>
+
+  <div class="map">
+    <div class="node"><span class="ix">L01</span><span class="ttl">Intro to ML</span><span class="sub">The three categories &mdash; you are visiting the second one.</span></div>
+    <div class="node"><span class="ix">L02</span><span class="ttl">Prob &amp; Stats</span><span class="sub">CIs on silhouette / inertia &mdash; same statistical lens.</span></div>
+    <div class="node"><span class="ix">L03</span><span class="ttl">Supervised</span><span class="sub">The preprocessing pipeline still applies &mdash; identical leakage discipline.</span></div>
+    <div class="node"><span class="ix">L04</span><span class="ttl">Sup. Advanced</span><span class="sub">Tune-one-knob discipline transfers to K and n_components.</span></div>
+    <div class="node is-now"><span class="ix">L05</span><span class="ttl">Unsupervised</span><span class="sub">PCA, K-Means, Isolation Forest. You are here.</span></div>
+    <div class="node"><span class="lens">L05</span><span class="ix">L06</span><span class="ttl">Time Series</span><span class="sub">Anomaly detection on residuals reuses Isolation Forest; seasonal decomposition is PCA's time-series cousin.</span></div>
+    <div class="node"><span class="lens">L05</span><span class="ix">L07</span><span class="ttl">Neural Nets</span><span class="sub">Autoencoders generalise PCA; reconstruction error is an anomaly score.</span></div>
+    <div class="node"><span class="lens">L05</span><span class="ix">L08</span><span class="ttl">Vision</span><span class="sub">Image embeddings &rarr; PCA / UMAP. Defect detection = IsoForest on image features.</span></div>
+    <div class="node"><span class="lens">L05</span><span class="ix">L09</span><span class="ttl">NLP</span><span class="sub">Document embeddings clustered with K-Means &mdash; topic discovery without labels.</span></div>
+    <div class="node"><span class="lens">L05</span><span class="ix">L10</span><span class="ttl">GenAI</span><span class="sub">Semantic search is distance in a learned space; same metric intuitions.</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="colophon">L05 &middot; Unsupervised Learning &middot; Learner Edition<br>Interactive key-concepts page &mdash; companion to the NorthStar Retail story.<br>Set in Open Sans and JetBrains Mono.</div>
+  <div class="stamp">&mdash; end of file 05.</div>
+</footer>
+
+<script>
+function rng(seed){return function(){seed=(seed*9301+49297)%233280;return seed/233280;}}
+function randn(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* §II · PCA before/after scaling */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const r = rng(11);
+  const pts = [];
+  for (let i=0;i<140;i++){
+    const e = randn(r);
+    const noise1 = randn(r), noise2 = randn(r);
+    const spend = 220 + 110*e + 60*noise1;
+    const ratio = 0.50 + 0.18*e + 0.08*noise2;
+    pts.push({spend, ratio});
+  }
+  function axes(svg, w, h){
+    const ax = document.createElementNS(NS,'rect');
+    ax.setAttribute('x',8);ax.setAttribute('y',8);
+    ax.setAttribute('width',w-16);ax.setAttribute('height',h-16);
+    ax.setAttribute('fill','none');ax.setAttribute('stroke','#1b1812');
+    svg.appendChild(ax);
+  }
+  function drawRaw(){
+    const svg = document.getElementById('pcaRaw');
+    svg.innerHTML='';
+    const w=360,h=260;
+    axes(svg,w,h);
+    const sxMin=0,sxMax=500,syMin=0,syMax=1;
+    for (const p of pts){
+      const cx = 12 + ((p.spend-sxMin)/(sxMax-sxMin))*(w-24);
+      const cy = (h-12) - ((p.ratio-syMin)/(syMax-syMin))*(h-24);
+      const c = document.createElementNS(NS,'circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);
+      c.setAttribute('r',3);c.setAttribute('fill','#13110c');c.setAttribute('opacity',0.7);
+      svg.appendChild(c);
+    }
+    const arrow = document.createElementNS(NS,'line');
+    arrow.setAttribute('x1', 30); arrow.setAttribute('y1', h/2);
+    arrow.setAttribute('x2', w-30); arrow.setAttribute('y2', h/2);
+    arrow.setAttribute('stroke','#cf3a17'); arrow.setAttribute('stroke-width',2.5);
+    arrow.setAttribute('marker-end','url(#ar1)');
+    svg.appendChild(arrow);
+    const defs = document.createElementNS(NS,'defs');
+    defs.innerHTML = '<marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#cf3a17"/></marker>';
+    svg.appendChild(defs);
+    const lbl = document.createElementNS(NS,'text');
+    lbl.setAttribute('x', w-34); lbl.setAttribute('y', h/2 - 8);
+    lbl.setAttribute('text-anchor','end');
+    lbl.setAttribute('font-family','JetBrains Mono, monospace');
+    lbl.setAttribute('font-size','10');
+    lbl.setAttribute('fill','#cf3a17');
+    lbl.setAttribute('letter-spacing','1.2');
+    lbl.textContent = 'PC1  ≈  SPEND';
+    svg.appendChild(lbl);
+    const ax1 = document.createElementNS(NS,'text');
+    ax1.setAttribute('x', 12); ax1.setAttribute('y', h-4);
+    ax1.setAttribute('font-family','JetBrains Mono, monospace');
+    ax1.setAttribute('font-size','9'); ax1.setAttribute('fill','#65604f');
+    ax1.setAttribute('letter-spacing','1.4');
+    ax1.textContent = 'SPEND (£0–500)  →';
+    svg.appendChild(ax1);
+    const ax2 = document.createElementNS(NS,'text');
+    ax2.setAttribute('x',-h+12); ax2.setAttribute('y',14);
+    ax2.setAttribute('transform','rotate(-90)');
+    ax2.setAttribute('font-family','JetBrains Mono, monospace');
+    ax2.setAttribute('font-size','9'); ax2.setAttribute('fill','#65604f');
+    ax2.setAttribute('letter-spacing','1.4');
+    ax2.textContent = 'RETURNS (0–1)  →';
+    svg.appendChild(ax2);
+  }
+  function drawScaled(){
+    const svg = document.getElementById('pcaScaled');
+    svg.innerHTML='';
+    const w=360,h=260;
+    axes(svg,w,h);
+    const mxS = pts.reduce((a,b)=>a+b.spend,0)/pts.length;
+    const sxS = Math.sqrt(pts.reduce((a,b)=>a+(b.spend-mxS)**2,0)/pts.length);
+    const myS = pts.reduce((a,b)=>a+b.ratio,0)/pts.length;
+    const syS = Math.sqrt(pts.reduce((a,b)=>a+(b.ratio-myS)**2,0)/pts.length);
+    for (const p of pts){
+      const zx = (p.spend - mxS)/sxS;
+      const zy = (p.ratio - myS)/syS;
+      const cx = w/2 + zx*(w/2-30)/3.2;
+      const cy = h/2 - zy*(h/2-30)/3.2;
+      const c = document.createElementNS(NS,'circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);
+      c.setAttribute('r',3);c.setAttribute('fill','#13110c');c.setAttribute('opacity',0.7);
+      svg.appendChild(c);
+    }
+    const x1=30,y1=h-30,x2=w-30,y2=30;
+    const arr = document.createElementNS(NS,'line');
+    arr.setAttribute('x1',x1);arr.setAttribute('y1',y1);
+    arr.setAttribute('x2',x2);arr.setAttribute('y2',y2);
+    arr.setAttribute('stroke','#cf3a17');arr.setAttribute('stroke-width',2.5);
+    arr.setAttribute('marker-end','url(#ar2)');
+    svg.appendChild(arr);
+    const defs = document.createElementNS(NS,'defs');
+    defs.innerHTML = '<marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#cf3a17"/></marker>';
+    svg.appendChild(defs);
+    const lbl = document.createElementNS(NS,'text');
+    lbl.setAttribute('x', x2-4); lbl.setAttribute('y', y2-6);
+    lbl.setAttribute('text-anchor','end');
+    lbl.setAttribute('font-family','JetBrains Mono, monospace');
+    lbl.setAttribute('font-size','10');
+    lbl.setAttribute('fill','#cf3a17');
+    lbl.setAttribute('letter-spacing','1.2');
+    lbl.textContent = 'PC1  ≈  ENGAGEMENT';
+    svg.appendChild(lbl);
+    const ax1 = document.createElementNS(NS,'text');
+    ax1.setAttribute('x',12); ax1.setAttribute('y',h-4);
+    ax1.setAttribute('font-family','JetBrains Mono, monospace');
+    ax1.setAttribute('font-size','9');ax1.setAttribute('fill','#65604f');
+    ax1.setAttribute('letter-spacing','1.4');
+    ax1.textContent='SPEND (z-score)  →';
+    svg.appendChild(ax1);
+    const ax2 = document.createElementNS(NS,'text');
+    ax2.setAttribute('x',-h+12);ax2.setAttribute('y',14);
+    ax2.setAttribute('transform','rotate(-90)');
+    ax2.setAttribute('font-family','JetBrains Mono, monospace');
+    ax2.setAttribute('font-size','9');ax2.setAttribute('fill','#65604f');
+    ax2.setAttribute('letter-spacing','1.4');
+    ax2.textContent='RETURNS (z-score)  →';
+    svg.appendChild(ax2);
+  }
+  drawRaw();
+  drawScaled();
+})();
+
+/* §III · K-Means k-picker */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const kSlider = document.getElementById('kSlider');
+  const kV = document.getElementById('kV');
+  const kCurves = document.getElementById('kCurves');
+  const kPoints = document.getElementById('kPoints');
+  const kVerdict = document.getElementById('kVerdict');
+  const kSizes = document.getElementById('kSizes');
+
+  const r = rng(31);
+  const centers = [
+    {x:0.22, y:0.22, n:160},
+    {x:0.74, y:0.28, n:140},
+    {x:0.30, y:0.78, n:170},
+    {x:0.78, y:0.74, n:130},
+  ];
+  const pts = [];
+  for (let i=0;i<centers.length;i++){
+    for (let j=0;j<centers[i].n;j++){
+      pts.push({ x: centers[i].x + randn(r)*0.05, y: centers[i].y + randn(r)*0.05 });
+    }
+  }
+  for (let i=0;i<12;i++){
+    pts.push({ x: r()*0.9 + 0.05, y: r()*0.9 + 0.05 });
+  }
+
+  function kmeans(points, K){
+    const cents = [{x:points[0].x, y:points[0].y}];
+    for (let k=1;k<K;k++){
+      let best=null, bestD=-1;
+      for (const p of points){
+        let dMin=Infinity;
+        for (const c of cents){
+          const d = (p.x-c.x)**2+(p.y-c.y)**2;
+          if (d<dMin) dMin=d;
+        }
+        if (dMin>bestD){ bestD=dMin; best=p; }
+      }
+      cents.push({x:best.x, y:best.y});
+    }
+    const assign = new Array(points.length).fill(0);
+    for (let it=0;it<14;it++){
+      for (let i=0;i<points.length;i++){
+        let best=0,bestD=Infinity;
+        for (let k=0;k<K;k++){
+          const d = (points[i].x-cents[k].x)**2 + (points[i].y-cents[k].y)**2;
+          if (d<bestD){bestD=d; best=k;}
+        }
+        assign[i] = best;
+      }
+      const sumX = new Array(K).fill(0), sumY = new Array(K).fill(0), cnt = new Array(K).fill(0);
+      for (let i=0;i<points.length;i++){
+        sumX[assign[i]] += points[i].x;
+        sumY[assign[i]] += points[i].y;
+        cnt[assign[i]]++;
+      }
+      for (let k=0;k<K;k++){
+        if (cnt[k]>0){ cents[k].x = sumX[k]/cnt[k]; cents[k].y = sumY[k]/cnt[k]; }
+      }
+    }
+    let inertia = 0;
+    for (let i=0;i<points.length;i++){
+      const c = cents[assign[i]];
+      inertia += (points[i].x-c.x)**2 + (points[i].y-c.y)**2;
+    }
+    return {assign, cents, inertia};
+  }
+
+  const fits = {};
+  for (let K=2;K<=10;K++) fits[K] = kmeans(pts, K);
+
+  function silhouette(points, fit){
+    const {assign, cents} = fit;
+    const K = cents.length;
+    const sample = [];
+    for (let i=0;i<points.length;i+=4) sample.push(i);
+    let total = 0, n = 0;
+    for (const i of sample){
+      const own = assign[i];
+      const cOwn = cents[own];
+      const a = Math.sqrt((points[i].x-cOwn.x)**2 + (points[i].y-cOwn.y)**2);
+      let b = Infinity;
+      for (let k=0;k<K;k++){
+        if (k===own) continue;
+        const d = Math.sqrt((points[i].x-cents[k].x)**2 + (points[i].y-cents[k].y)**2);
+        if (d<b) b = d;
+      }
+      const s = (b-a)/Math.max(a,b);
+      total += s; n++;
+    }
+    return total/n;
+  }
+  const sil = {}, ine = {};
+  for (let K=2;K<=10;K++){
+    sil[K] = silhouette(pts, fits[K]);
+    ine[K] = fits[K].inertia;
+  }
+  const ineMin = Math.min(...Object.values(ine));
+  const ineMax = Math.max(...Object.values(ine));
+  const silMin = Math.min(...Object.values(sil));
+  const silMax = Math.max(...Object.values(sil));
+
+  function renderCurves(K){
+    kCurves.innerHTML='';
+    const W=600,H=230,PAD=34;
+    const ax = document.createElementNS(NS,'rect');
+    ax.setAttribute('x',PAD);ax.setAttribute('y',16);
+    ax.setAttribute('width',W-2*PAD);ax.setAttribute('height',H-PAD-16);
+    ax.setAttribute('fill','#f0e8d4');ax.setAttribute('stroke','#1b1812');
+    kCurves.appendChild(ax);
+    for (let k=2;k<=10;k++){
+      const x = PAD + ((k-2)/8)*(W-2*PAD);
+      const tk = document.createElementNS(NS,'line');
+      tk.setAttribute('x1',x);tk.setAttribute('x2',x);
+      tk.setAttribute('y1',H-PAD);tk.setAttribute('y2',H-PAD+5);
+      tk.setAttribute('stroke','#65604f');
+      kCurves.appendChild(tk);
+      const t = document.createElementNS(NS,'text');
+      t.setAttribute('x',x);t.setAttribute('y',H-PAD+18);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('font-family','JetBrains Mono, monospace');
+      t.setAttribute('font-size','10');t.setAttribute('fill','#65604f');
+      t.textContent = k;
+      kCurves.appendChild(t);
+    }
+    function plot(map, mn, mx, color){
+      let d='';
+      const keys = Object.keys(map).map(Number).sort((a,b)=>a-b);
+      for (let i=0;i<keys.length;i++){
+        const k = keys[i];
+        const norm = (map[k]-mn)/(mx-mn || 1);
+        const x = PAD + ((k-2)/8)*(W-2*PAD);
+        const y = (H-PAD) - norm*(H-PAD-16);
+        d += (i===0?'M':'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+        const c = document.createElementNS(NS,'circle');
+        c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',3.5);
+        c.setAttribute('fill',color);
+        kCurves.appendChild(c);
+      }
+      const path = document.createElementNS(NS,'path');
+      path.setAttribute('d',d);path.setAttribute('stroke',color);
+      path.setAttribute('stroke-width',2);path.setAttribute('fill','none');
+      kCurves.appendChild(path);
+    }
+    plot(ine, ineMin, ineMax, '#0e4540');
+    plot(sil, silMin, silMax, '#cf3a17');
+    const xK = PAD + ((K-2)/8)*(W-2*PAD);
+    const v = document.createElementNS(NS,'line');
+    v.setAttribute('x1',xK);v.setAttribute('x2',xK);
+    v.setAttribute('y1',16);v.setAttribute('y2',H-PAD);
+    v.setAttribute('stroke','#13110c');v.setAttribute('stroke-width','2');
+    kCurves.appendChild(v);
+    const lg = document.createElementNS(NS,'g');
+    lg.innerHTML = '<text x="'+(PAD+4)+'" y="30" font-family="JetBrains Mono, monospace" font-size="10" fill="#0e4540" letter-spacing="1.2">— INERTIA</text><text x="'+(PAD+4)+'" y="44" font-family="JetBrains Mono, monospace" font-size="10" fill="#cf3a17" letter-spacing="1.2">— SILHOUETTE</text>';
+    kCurves.appendChild(lg);
+  }
+
+  const palette = ['#cf3a17','#0e4540','#b8881f','#7a1d0a','#1c6e66','#13110c','#65604f','#e07a3a','#2e7c75','#4a3a26'];
+  function renderPoints(K){
+    kPoints.innerHTML='';
+    const W=600,H=280;
+    const fit = fits[K];
+    const counts = new Array(K).fill(0);
+    for (let i=0;i<pts.length;i++) counts[fit.assign[i]]++;
+    for (let i=0;i<pts.length;i++){
+      const p = pts[i];
+      const cx = 12 + p.x*(W-24);
+      const cy = (H-12) - p.y*(H-24);
+      const c = document.createElementNS(NS,'circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);
+      c.setAttribute('r',3);
+      c.setAttribute('fill', palette[fit.assign[i] % palette.length]);
+      c.setAttribute('opacity', 0.78);
+      kPoints.appendChild(c);
+    }
+    for (let k=0;k<K;k++){
+      const c = fit.cents[k];
+      const cx = 12 + c.x*(W-24);
+      const cy = (H-12) - c.y*(H-24);
+      const path = document.createElementNS(NS,'path');
+      path.setAttribute('d', 'M'+(cx-6)+','+cy+' L'+(cx+6)+','+cy+' M'+cx+','+(cy-6)+' L'+cx+','+(cy+6));
+      path.setAttribute('stroke','#13110c'); path.setAttribute('stroke-width',2);
+      kPoints.appendChild(path);
+    }
+    kSizes.innerHTML='';
+    const tot = pts.length;
+    for (let k=0;k<K;k++){
+      const sz = document.createElement('div');
+      sz.className = 'sz' + (counts[k]<30 ? ' tiny' : '');
+      sz.innerHTML = '<span class="dot" style="background:'+palette[k]+'"></span>C'+k+' &middot; '+counts[k]+' ('+Math.round(counts[k]/tot*100)+'%)';
+      kSizes.appendChild(sz);
+    }
+    const minSize = Math.min(...counts);
+    const maxSize = Math.max(...counts);
+    let h='';
+    if (minSize < 30 && maxSize > 100){
+      h = "Tiny &amp; huge clusters &mdash; <em>likely an anomaly cluster.</em>";
+    } else if (K<=2){
+      h = "Coarse split. <em>K is too low.</em>";
+    } else if (K>=8){
+      h = "Many small clusters. <em>K is too high &mdash; over-segmented.</em>";
+    } else {
+      h = "<em>Balanced.</em> Defensible for marketing campaigns.";
+    }
+    kVerdict.innerHTML = h;
+  }
+
+  function render(){
+    const K = parseInt(kSlider.value,10);
+    kV.textContent = K;
+    renderCurves(K);
+    renderPoints(K);
+  }
+  kSlider.addEventListener('input', render);
+  render();
+})();
+
+/* §V · Isolation Forest */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const slider = document.getElementById('conSlider');
+  const conV = document.getElementById('conV');
+  const isoSvg = document.getElementById('isoSvg');
+  const isoCount = document.getElementById('isoCount');
+  const isoRows = document.getElementById('isoRows');
+
+  const r = rng(99);
+  const N = 240;
+  const pts = [];
+  for (let i=0;i<N;i++){
+    let x, y, anomaly = false;
+    if (r() < 0.08){
+      x = 0.5 + (r()<0.5?-1:1) * (0.30 + r()*0.18);
+      y = 0.5 + (r()<0.5?-1:1) * (0.28 + r()*0.18);
+      anomaly = true;
+    } else {
+      x = 0.5 + randn(r)*0.08;
+      y = 0.5 + randn(r)*0.09;
+    }
+    const d = Math.sqrt((x-0.5)**2 + (y-0.5)**2);
+    pts.push({ x, y, score: d, anomaly });
+  }
+  const stories = [
+    "tenure 70mo · 0 purchases · 7 tickets",
+    "spend £4,200 (1 order) · 4 returns",
+    "logins 0 · returns ratio 0.92",
+    "tickets 12 · tenure 3mo · returns 0",
+    "premium tier · spend £8 · 1 review",
+    "tenure 2mo · spend £1,800 · 0 reviews",
+    "returns 0.85 · tickets 0 · logins 38",
+    "tenure 60mo · spend £0 this Q · tickets 5",
+    "logins 240 · spend £42 · returns 0",
+    "spend £0 · 6 tickets · 0 returns",
+    "tenure 1mo · spend £6,400 · 0 returns",
+    "returns 0.78 · tickets 9 · tenure 50mo",
+    "logins 4 · spend £980 · 8 returns",
+    "spend £200 · returns 0 · logins 1",
+    "tenure 40mo · spend £15 · tickets 6",
+  ];
+
+  function render(){
+    const con = parseInt(slider.value,10);
+    conV.textContent = con.toFixed(1) + '%';
+    const sorted = pts.map((p,i)=>({...p,i})).sort((a,b)=>b.score-a.score);
+    const k = Math.round(con/100 * pts.length);
+    const flagged = new Set(sorted.slice(0,k).map(p=>p.i));
+
+    isoSvg.innerHTML='';
+    const W=600,H=280;
+    const ax = document.createElementNS(NS,'rect');
+    ax.setAttribute('x',8);ax.setAttribute('y',8);
+    ax.setAttribute('width',W-16);ax.setAttribute('height',H-16);
+    ax.setAttribute('fill','none');ax.setAttribute('stroke','#1b1812');
+    isoSvg.appendChild(ax);
+    const thrScore = sorted[k-1] ? sorted[k-1].score : sorted[0].score;
+    const cx0 = 12 + 0.5*(W-24), cy0 = (H-12) - 0.5*(H-24);
+    const rx = thrScore*(W-24), ry = thrScore*(H-24);
+    const ring = document.createElementNS(NS,'ellipse');
+    ring.setAttribute('cx',cx0);ring.setAttribute('cy',cy0);
+    ring.setAttribute('rx',rx);ring.setAttribute('ry',ry);
+    ring.setAttribute('fill','none');
+    ring.setAttribute('stroke','#cf3a17');
+    ring.setAttribute('stroke-width',1.5);
+    ring.setAttribute('stroke-dasharray','5 4');
+    isoSvg.appendChild(ring);
+
+    for (let i=0;i<pts.length;i++){
+      const p = pts[i];
+      const cx = 12 + p.x*(W-24);
+      const cy = (H-12) - p.y*(H-24);
+      const c = document.createElementNS(NS,'circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);
+      c.setAttribute('r', flagged.has(i) ? 4.5 : 2.5);
+      c.setAttribute('fill', flagged.has(i) ? '#cf3a17' : '#13110c');
+      c.setAttribute('opacity', flagged.has(i) ? 0.95 : 0.6);
+      isoSvg.appendChild(c);
+    }
+    const ax1 = document.createElementNS(NS,'text');
+    ax1.setAttribute('x',12); ax1.setAttribute('y',H-4);
+    ax1.setAttribute('font-family','JetBrains Mono, monospace');
+    ax1.setAttribute('font-size','9');ax1.setAttribute('fill','#65604f');
+    ax1.setAttribute('letter-spacing','1.4');
+    ax1.textContent='PC1  →';
+    isoSvg.appendChild(ax1);
+    const ax2 = document.createElementNS(NS,'text');
+    ax2.setAttribute('x',-H+12);ax2.setAttribute('y',14);
+    ax2.setAttribute('transform','rotate(-90)');
+    ax2.setAttribute('font-family','JetBrains Mono, monospace');
+    ax2.setAttribute('font-size','9');ax2.setAttribute('fill','#65604f');
+    ax2.setAttribute('letter-spacing','1.4');
+    ax2.textContent='PC2  →';
+    isoSvg.appendChild(ax2);
+
+    isoCount.textContent = k;
+    isoRows.innerHTML='';
+    const show = Math.min(k, 10);
+    for (let j=0;j<show;j++){
+      const s = sorted[j];
+      const row = document.createElement('div');
+      row.className='iso-row';
+      row.innerHTML = '<span class="id">#'+(1000+s.i)+'</span><span class="desc">'+stories[j%stories.length]+'</span><span class="sc">'+s.score.toFixed(2)+'</span>';
+      isoRows.appendChild(row);
+    }
+    if (k > 10){
+      const more = document.createElement('div');
+      more.className='iso-row';
+      more.innerHTML = '<span class="id"></span><span class="desc" style="color:var(--ink-soft)">…and '+(k-10)+' more on the watch list</span><span class="sc"></span>';
+      isoRows.appendChild(more);
+    }
+  }
+  slider.addEventListener('input', render);
+  render();
+})();
+
+/* Q&A flip */
+(function(){
+  document.querySelectorAll('.qa').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('on'));
+    c.tabIndex = 0;
+    c.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.classList.toggle('on'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
