@@ -106,7 +106,7 @@ Optional material lives in [`notebooks/optional_extensions.ipynb`](./notebooks/o
 ```
 README.md                              ← You are here
 setup.md                               ← One-time environment setup
-pre-class.md                           ← Phase 1: 75-min self-study guide
+pre-class.md                           ← Phase 1: 30-min self-study guide
 lesson.md                              ← Short reference: overview, takeaways, technique-choice checklist, review Q&A, course map
 reference.md                           ← Phase 3: Further reading + glossary
 environment.yml                        ← Conda environment spec
